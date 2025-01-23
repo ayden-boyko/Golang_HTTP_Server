@@ -11,6 +11,7 @@ import (
 
 // TODO: Add error handling
 // TODO: MAKE BETTER
+// TODO: USE CODE 301 for redirecting, long url is cached, so if tiny url is entered, a request to this server isnt made
 func Shorten(w http.ResponseWriter, r *http.Request) (uint64, string, string, error) {
 	id, base62_id, short_url, err := pkg.Url_shortener(w.Header().Get("Origin"), r.FormValue("url"))
 	if err != nil {

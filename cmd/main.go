@@ -5,6 +5,12 @@ import (
 	"net/http"
 )
 
+// more control over server
+// look into server() params
 func main() {
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	s := &http.Server{
+		Addr: ":8080",
+	}
+
+	log.Fatal(s.ListenAndServe())
 }
