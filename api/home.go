@@ -9,6 +9,6 @@ import (
 
 // TODO: Add error handling
 
-func Home(w http.ResponseWriter, r *http.Request) {
+func HandleHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "website/main.html")
 }

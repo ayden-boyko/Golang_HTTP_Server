@@ -1,16 +1,18 @@
 package main
 
 import (
+	"Golang_HTTP_Server/api"
 	"log"
 	"net/http"
 )
 
-// more control over server
-// look into server() params
 func main() {
-	s := &http.Server{
-		Addr: ":8080",
-	}
+	// Define routes
+	http.HandleFunc("/", api.HandleHome)       // Serve the website
+	http.HandleFunc("/{short_url}", api.Fetch) // Fetch and redirect to long URLs
 
-	log.Fatal(s.ListenAndServe())
+	// Start server
+	serverAddress := ":8080" // Default port
+	log.Printf("Server is listening on %s", serverAddress)
+	log.Fatal(http.ListenAndServe(serverAddress, nil)) // Start the server
 }
