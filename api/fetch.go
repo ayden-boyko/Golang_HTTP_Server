@@ -12,4 +12,5 @@ import (
 func Fetch(w http.ResponseWriter, r *http.Request) {
 	// Get the shortened URL from the request path
 	short_url := r.URL.Path[1:] // Remove the leading slash
+	println(short_url)
 }
