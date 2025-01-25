@@ -16,4 +16,5 @@ func (s *Server) RegisterRoutes() {
 	s.router.HandleFunc("/shorten", H.HandleShorten)
 	s.router.HandleFunc("/{short_url}", H.HandleURL)
 	s.router.Handle("/styles/", http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles"))))
+	s.router.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("website/scripts"))))
 }
