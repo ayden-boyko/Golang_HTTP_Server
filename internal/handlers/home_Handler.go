@@ -14,5 +14,4 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(w, r, "website/main.html")
-
 }

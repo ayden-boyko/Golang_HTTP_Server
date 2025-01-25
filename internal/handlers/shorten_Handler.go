@@ -12,8 +12,10 @@ import (
 )
 
 func HandleShorten(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("received post request")
 	switch r.Method {
 	case "POST":
+
 		base10_id, base62_id, long_url, err := pkg.Url_shortener(w.Header().Get("Origin"), r.FormValue("url"))
 
 		if err != nil {
