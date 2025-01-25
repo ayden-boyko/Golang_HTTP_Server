@@ -12,5 +12,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
+
 	http.ServeFile(w, r, "website/main.html")
+
 }

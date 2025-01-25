@@ -28,5 +28,6 @@ func NewServer() *Server {
 
 // Run runs the server on the given port.
 func (s *Server) Run(port string) error {
+	println("Server running on port " + port)
 	return http.ListenAndServe(port, s.router)
 }
