@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	Entry "Golang_HTTP_Server/internal/models"
 
@@ -17,7 +18,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("received post request")
 	switch r.Method {
 	case "POST":
-
+		fmt.Println("received post request", r)
 		uuid := uuid.New()
 
 		base10_id := binary.BigEndian.Uint64(uuid[:8])
@@ -31,9 +32,10 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 		tiny_url := "www.gourl.com" + base62_id
 
 		entry := Entry.Entry{
-			Id:        base10_id,
-			Base62_id: base62_id,
-			LongUrl:   r.FormValue("url"),
+			Id:           base10_id,
+			Base62_id:    base62_id,
+			LongUrl:      r.URL.Query().Get("url"),
+			Date_Created: time.Now(),
 		}
 
 		// save entry into sqlite db and/or cache, should be in a goroutine and a separate function?

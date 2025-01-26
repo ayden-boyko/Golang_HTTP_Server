@@ -10,7 +10,7 @@
     </header>
     <main>
       <h2>Long URL:</h2>
-      <form>
+      <form id="url-form">
         <input
           type="text"
           id="long-url"
@@ -23,16 +23,14 @@
       <p id="short-url"></p>
     </main>
   </body>
-  <!--
-   TODO : GET scripts working!
+
   <script src="scripts/scripts.js"></script>
   <script>
     document
-      .getElementById("shorten-button")
+      .getElementById("url-form")
       .addEventListener("submit", function (e) {
-        console.log("clicked");
         e.preventDefault(); // prevent default form submission
         submitForm(); // call your JavaScript function
       });
-  </script> -->
+  </script>
 </html>

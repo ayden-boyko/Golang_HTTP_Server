@@ -13,5 +13,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//fmt.Println("request", r)
+
 	http.ServeFile(w, r, "website/main.html")
 }

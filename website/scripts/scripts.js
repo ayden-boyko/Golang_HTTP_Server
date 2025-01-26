@@ -3,8 +3,7 @@
  * input box, sends a POST request to the /shorten endpoint, and then updates the
  * #short-url <p> element with the shortened URL.
  */
-async function submitForm(e) {
-  e.preventDefault();
+async function submitForm() {
   const url = document.getElementById("long-url").value;
 
   const fetchUrl = async () => {
