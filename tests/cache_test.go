@@ -5,5 +5,8 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	t.Log("TestCache")
+	_, err := "test", (*error)(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

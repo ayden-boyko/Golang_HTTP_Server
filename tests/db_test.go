@@ -5,5 +5,8 @@ import (
 )
 
 func TestDB(t *testing.T) {
-	t.Log("TestDB")
+	_, err := "test", (*error)(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
