@@ -5,7 +5,7 @@
  */
 async function submitForm() {
   const url = document.getElementById("long-url").value;
-
+  console.log("url:", url);
   const fetchUrl = async () => {
     const response = await fetch("/shorten", {
       method: "POST",
@@ -20,5 +20,5 @@ async function submitForm() {
 
   data = await fetchUrl();
   console.log("data:", data);
-  document.getElementById("short-url").textContent = data.ShortUrl;
+  document.getElementById("short-url").textContent = data.short_url;
 }
