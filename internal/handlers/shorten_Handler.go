@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,7 +9,8 @@ import (
 
 	Entry "Golang_HTTP_Server/internal/models"
 
-	pkg "github.com/ayden-boyko/Golang-URL-shrtnr/pkg"
+	pkg "github.com/ayden-boyko/Convert_Service_Go/pkg"
+	"github.com/google/uuid"
 )
 
 func HandleShorten(w http.ResponseWriter, r *http.Request) {
@@ -16,16 +18,22 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 
-		base10_id, base62_id, long_url, err := pkg.Url_shortener(w.Header().Get("Origin"), r.FormValue("url"))
+		uuid := uuid.New()
+
+		base10_id := binary.BigEndian.Uint64(uuid[:8])
+
+		base62_id, err := pkg.Uint64ToBase62(base10_id)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		tiny_url := "www.gourl.com" + base62_id
+
 		entry := Entry.Entry{
 			Id:        base10_id,
 			Base62_id: base62_id,
-			LongUrl:   long_url,
+			LongUrl:   r.FormValue("url"),
 		}
 
 		// save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
@@ -34,7 +42,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 		response := struct {
 			ShortUrl string `json:"short_url"`
 		}{
-			ShortUrl: entry.Base62_id,
+			ShortUrl: tiny_url,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Println("response:", response)

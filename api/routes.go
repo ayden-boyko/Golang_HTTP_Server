@@ -7,12 +7,8 @@ import (
 
 func (s *Server) RegisterRoutes() {
 	s.router.HandleFunc("/", H.Home) // or http instead of s.router
-	// s.router.HandleFunc("/shorten", func(w http.ResponseWriter, r *http.Request) {
-	// 	if err := H.HandleShorten; err != nil {
-	// 		log.Printf("Error in Home handler: %v", err)
-	// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	}
-	// })
+
+	// http.Handle("/", http.FileServer(http.Dir("./static")))
 	s.router.HandleFunc("/shorten", H.HandleShorten)
 	s.router.HandleFunc("/{short_url}", H.HandleURL)
 	s.router.Handle("/styles/", http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles"))))

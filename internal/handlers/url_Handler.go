@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	pkg "github.com/ayden-boyko/Golang-URL-shrtnr/pkg"
+	pkg "github.com/ayden-boyko/Convert_Service_Go/pkg"
 )
 
 // TODO: Add error handling
@@ -16,7 +16,7 @@ func HandleURL(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		Base62_id := r.URL.Path[1:]
-		Base10_id, err := pkg.FromBase62(Base62_id)
+		Base10_id, err := pkg.Base62ToUint64(Base62_id)
 
 		if err != nil {
 			log.Fatal(err)
