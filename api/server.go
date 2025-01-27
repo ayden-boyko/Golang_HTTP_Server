@@ -11,23 +11,61 @@
 package api
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
 )
 
 // Server is a thin wrapper around http.ServeMux.
 type Server struct {
-	router *http.ServeMux
+	Router *http.ServeMux
+	DB     *sql.DB
+	Cache  map[string]string // TODO SET UP CACHEs
 }
 
 // NewServer creates a new server with an empty request multiplexer.
 func NewServer() *Server {
 	return &Server{
-		router: http.NewServeMux(),
+		Router: http.NewServeMux(),
+		DB:     nil,
 	}
 }
 
+func (s *Server) initDB(db string, dbdriver string, initfile string) {
+	var err error
+	//fmt.Println("Initializing database...", db, dbdriver, initfile)
+	s.DB, err = sql.Open(dbdriver, db)
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+	fmt.Println("Database opened")
+
+	// Read the contents of the initfile
+	sqlScript, err := os.ReadFile(initfile)
+	if err != nil {
+		log.Fatalf("Error reading init file: %v", err)
+	}
+
+	_, err = s.DB.Exec(string(sqlScript))
+	if err != nil {
+		log.Fatalf("Error initializing database: %v, error within %s", err, initfile)
+	}
+	fmt.Println("Database initialized")
+
+	vals, err := s.DB.Query("SELECT * FROM entries")
+	if err != nil {
+		log.Fatalf("Error querying database: %v", err)
+	}
+
+	fmt.Println("Database queried", vals)
+
+}
+
 // Run runs the server on the given port.
-func (s *Server) Run(port string) error {
+func (s *Server) Run(port string, db string, dbdriver string, initfile string) error {
 	println("Server running on port " + port)
-	return http.ListenAndServe(port, s.router)
+	s.initDB(db, dbdriver, initfile)
+	return http.ListenAndServe(port, s.Router)
 }

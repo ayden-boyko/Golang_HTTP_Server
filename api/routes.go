@@ -7,16 +7,16 @@ import (
 )
 
 func (s *Server) RegisterRoutes() {
-	//s.router.HandleFunc("/", H.Home) // or http instead of s.router
+	//s.Router.HandleFunc("/", H.Home) // or http instead of s.Router
 
-	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err := H.Home(w, r); err != nil {
 			log.Printf("Error in Home handler: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
 
-	// s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	if err := H.Home; err != nil {
 	// 		log.Printf("Error in Home handler: %v", err)
 	// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -24,12 +24,12 @@ func (s *Server) RegisterRoutes() {
 	// })
 
 	// http.Handle("/", http.FileServer(http.Dir("./static")))
-	s.router.HandleFunc("/shorten", H.HandleShorten)
-	s.router.HandleFunc("/{short_url}", H.HandleURL)
+	s.Router.HandleFunc("/shorten", H.HandleShorten)
+	s.Router.HandleFunc("/{short_url}", H.HandleURL)
 
 	// Then modify your routes:
-	s.router.Handle("/styles/", loggingMiddleware(http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles")))))
-	s.router.Handle("/scripts/", loggingMiddleware(http.StripPrefix("/scripts/", http.FileServer(http.Dir("website/scripts")))))
+	s.Router.Handle("/styles/", loggingMiddleware(http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles")))))
+	s.Router.Handle("/scripts/", loggingMiddleware(http.StripPrefix("/scripts/", http.FileServer(http.Dir("website/scripts")))))
 
 }
 
