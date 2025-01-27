@@ -27,6 +27,10 @@ func HandleURL(w http.ResponseWriter, r *http.Request) {
 
 		// use base10_id to search cache and then sqlitedb if not found
 
+		// TODO check if entry is in cache
+
+		// TODO check if entry is in sqlitedb
+
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
