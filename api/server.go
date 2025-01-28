@@ -22,7 +22,9 @@ import (
 type Server struct {
 	Router *http.ServeMux
 	DB     *sql.DB
-	Cache  map[string]string // TODO SET UP CACHEs
+	Cache  map[string]string // TODO set up cache
+	// Cache implementation: You have a TODO comment about setting up caches.
+	// 						You might want to consider using a library like github.com/patrickmn/go-cache or github.com/bradfitz/gomemcache
 }
 
 // NewServer creates a new server with an empty request multiplexer.
