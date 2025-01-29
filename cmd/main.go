@@ -12,7 +12,7 @@ func main() {
 	server.Run(":8080", "database/entries.db", "sqlite", "database/schema.sql")
 }
 
-// TODO
+// TODO : implement a way for the handler to get and push data to the db, in an idiomatic way
 
 // Database handling: Your initDB function in api/server.go is responsible for initializing the database connection and executing the SQL script from the initfile.
 // 					This is a good approach, but you might want to consider separating the database initialization logic into its own package or file to keep the server logic clean.
