@@ -13,6 +13,8 @@ func main() {
 }
 
 // TODO : implement a way for the handler to get and push data to the db, in an idiomatic way
+//			Data interaction struct, implements the get&push interface, plus a constructor (takes in a db),
+//			the server passes in an instance created by the constructor to the handler
 
 // Database handling: Your initDB function in api/server.go is responsible for initializing the database connection and executing the SQL script from the initfile.
 // 					This is a good approach, but you might want to consider separating the database initialization logic into its own package or file to keep the server logic clean.

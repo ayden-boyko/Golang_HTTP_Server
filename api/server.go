@@ -21,7 +21,7 @@ import (
 // Server is a thin wrapper around http.ServeMux.
 type Server struct {
 	Router *http.ServeMux
-	DB     *sql.DB
+	db     *sql.DB
 	Cache  map[string]string // TODO set up cache
 	// Cache implementation: You have a TODO comment about setting up caches.
 	// 						You might want to consider using a library like github.com/patrickmn/go-cache or github.com/bradfitz/gomemcache
@@ -31,14 +31,14 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		Router: http.NewServeMux(),
-		DB:     nil,
+		db:     nil,
 	}
 }
 
 func (s *Server) initDB(db string, dbdriver string, initfile string) {
 	var err error
 	//fmt.Println("Initializing database...", db, dbdriver, initfile)
-	s.DB, err = sql.Open(dbdriver, db)
+	s.db, err = sql.Open(dbdriver, db)
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)
 	}
@@ -50,13 +50,13 @@ func (s *Server) initDB(db string, dbdriver string, initfile string) {
 		log.Fatalf("Error reading init file: %v", err)
 	}
 
-	_, err = s.DB.Exec(string(sqlScript))
+	_, err = s.db.Exec(string(sqlScript))
 	if err != nil {
 		log.Fatalf("Error initializing database: %v, error within %s", err, initfile)
 	}
 	fmt.Println("Database initialized")
 
-	vals, err := s.DB.Query("SELECT * FROM entries")
+	vals, err := s.db.Query("SELECT * FROM entries")
 	if err != nil {
 		log.Fatalf("Error querying database: %v", err)
 	}

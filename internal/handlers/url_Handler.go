@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 
+	models "Golang_HTTP_Server/internal/models"
+
 	pkg "github.com/ayden-boyko/Convert_Service_Go/pkg"
 )
 
 // TODO: Add error handling
 // TODO: USE CODE 301 for redirecting, long url is cached, so if tiny url is entered, a request to this server isnt made
-func HandleURL(w http.ResponseWriter, r *http.Request) {
+func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImpl) error {
 
 	switch r.Method {
 	case "GET":
@@ -30,11 +32,20 @@ func HandleURL(w http.ResponseWriter, r *http.Request) {
 		// TODO check if entry is in cache
 
 		// TODO check if entry is in sqlitedb
+		val, err := dm.GetEntry(Base10_id)
+
+		if err != nil {
+			return err
+		}
+
+		// redirect to long url
+		http.Redirect(w, r, val, http.StatusMovedPermanently)
 
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	// save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
+	//TODO save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
 
+	return nil
 }

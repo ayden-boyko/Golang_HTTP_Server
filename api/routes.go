@@ -2,12 +2,14 @@ package api
 
 import (
 	H "Golang_HTTP_Server/internal/handlers"
+	internal "Golang_HTTP_Server/internal/models"
 	"log"
 	"net/http"
 )
 
 func (s *Server) RegisterRoutes() {
-	//s.Router.HandleFunc("/", H.Home) // or http instead of s.Router
+	// Data manager created
+	manager := internal.NewDataManager(s.db)
 
 	s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err := H.Home(w, r); err != nil {
@@ -24,8 +26,18 @@ func (s *Server) RegisterRoutes() {
 	// })
 
 	// http.Handle("/", http.FileServer(http.Dir("./static")))
-	s.Router.HandleFunc("/shorten", H.HandleShorten)
-	s.Router.HandleFunc("/{short_url}", H.HandleURL)
+	s.Router.HandleFunc("/shorten", func(w http.ResponseWriter, r *http.Request) {
+		if err := H.HandleShorten(w, r, manager); err != nil {
+			log.Printf("Error in HandleShorten handler: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
+	s.Router.HandleFunc("/{short_url}", func(w http.ResponseWriter, r *http.Request) {
+		if err := H.HandleURL(w, r, manager); err != nil {
+			log.Printf("Error in HandleURL handler: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	})
 
 	// Then modify your routes:
 	s.Router.Handle("/styles/", loggingMiddleware(http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles")))))

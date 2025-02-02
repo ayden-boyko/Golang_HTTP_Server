@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func HandleShorten(w http.ResponseWriter, r *http.Request) {
+func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImpl) error {
 	fmt.Println("received post request")
 	switch r.Method {
 	case "POST":
@@ -23,7 +24,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return errors.New("error decoding request body")
 		}
 
 		uuid := uuid.New()
@@ -45,7 +46,12 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 			Date_Created: time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60)),
 		}
 
-		// save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
+		// TODO save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
+
+		if err := dm.PushData(entry); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return errors.New("error pushing entry to db")
+		}
 		fmt.Println("entry:", entry)
 
 		response := struct {
@@ -60,4 +66,6 @@ func HandleShorten(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+
+	return nil
 }
