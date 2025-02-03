@@ -48,8 +48,6 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 
 		fmt.Println("entry:", entry)
 
-		// TODO save entry into cache, should be in a goroutine and a separate function?
-
 		// TODO, make a goroutine to save entry into sqlitedb?
 		if err := dm.PushData(entry); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

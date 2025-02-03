@@ -27,8 +27,6 @@ func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImp
 
 		// use base10_id to search cache and then sqlitedb if not found
 
-		// TODO check if entry is in cache
-
 		// TODO check if entry is in sqlitedb
 		val, err := dm.GetEntry(Base10_id)
 
@@ -42,8 +40,5 @@ func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImp
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-
-	//TODO save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
-
 	return nil
 }

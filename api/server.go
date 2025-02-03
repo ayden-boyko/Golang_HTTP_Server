@@ -16,15 +16,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 )
 
 // Server is a thin wrapper around http.ServeMux.
 type Server struct {
 	Router *http.ServeMux
 	db     *sql.DB
-	Cache  map[string]string // TODO set up cache
-	// Cache implementation: You have a TODO comment about setting up caches.
-	// 						You might want to consider using a library like github.com/patrickmn/go-cache or github.com/bradfitz/gomemcache
+	Cache  *cache.Cache
 }
 
 // NewServer creates a new server with an empty request multiplexer.
@@ -32,7 +33,7 @@ func NewServer() *Server {
 	return &Server{
 		Router: http.NewServeMux(),
 		db:     nil,
-		Cache:  make(map[string]string),
+		Cache:  cache.New(10*time.Minute, 10*time.Minute), // defualt expo, purge expo (10,10 minutes)
 	}
 }
 
@@ -72,4 +73,27 @@ func (s *Server) Run(port string, db string, dbdriver string, initfile string) e
 	s.initDB(db, dbdriver, initfile)
 	s.RegisterRoutes()
 	return http.ListenAndServe(port, s.Router)
+}
+
+func (s *Server) checkCache(next http.Handler) http.Handler { // TODO save entry into cache, should be in a goroutine and a separate function? MIDDLEWARE
+	/// on get resquest, check if entry is in cache, on post request, add entry to cache
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		entry, found := s.Cache.Get(r.URL.Path[1:])
+		if found {
+			fmt.Println("Cache hit")
+			w.Write(entry.([]byte))
+			fmt.Println(entry.([]byte))
+			return
+		}
+		fmt.Println("Cache miss")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) LogAction(next http.Handler) http.Handler { // TODO set up logs
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request received: %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+		log.Printf("Request completed: %s %s", r.Method, r.URL.Path)
+	})
 }
