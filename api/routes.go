@@ -11,6 +11,8 @@ func (s *Server) RegisterRoutes() {
 	// Data manager created
 	manager := internal.NewDataManager(s.db)
 
+	log.Printf("manager created, %v", manager) // TODO db is nil, why?
+
 	s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err := H.Home(w, r); err != nil {
 			log.Printf("Error in Home handler: %v", err)

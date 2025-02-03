@@ -29,12 +29,12 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 
 		uuid := uuid.New()
 
-		base10_id := binary.BigEndian.Uint64(uuid[:8])
+		base10_id := binary.BigEndian.Uint64(uuid[:12])
 
 		base62_id, err := pkg.Uint64ToBase62(base10_id)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("error converting to base62", err)
 		}
 
 		tiny_url := "www.gourl.com/" + base62_id
@@ -46,13 +46,16 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 			Date_Created: time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60)),
 		}
 
+		fmt.Println("entry:", entry)
+
 		// TODO save entry into sqlite db and/or cache, should be in a goroutine and a separate function?
 
 		if err := dm.PushData(entry); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return errors.New("error pushing entry to db")
 		}
-		fmt.Println("entry:", entry)
+
+		fmt.Println("tiny_url:", tiny_url)
 
 		response := struct {
 			ShortUrl string `json:"short_url"`

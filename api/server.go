@@ -32,6 +32,7 @@ func NewServer() *Server {
 	return &Server{
 		Router: http.NewServeMux(),
 		db:     nil,
+		Cache:  make(map[string]string),
 	}
 }
 
@@ -56,12 +57,12 @@ func (s *Server) initDB(db string, dbdriver string, initfile string) {
 	}
 	fmt.Println("Database initialized")
 
-	vals, err := s.db.Query("SELECT * FROM entries")
+	_, err = s.db.Query("SELECT * FROM entries")
 	if err != nil {
 		log.Fatalf("Error querying database: %v", err)
 	}
 
-	fmt.Println("Database queried", vals)
+	//fmt.Println("Database queried", vals)
 
 }
 

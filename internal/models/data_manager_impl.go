@@ -2,6 +2,7 @@ package internal
 
 import (
 	"database/sql"
+	"errors"
 )
 
 type DataManagerImpl struct {
@@ -14,7 +15,12 @@ func NewDataManager(db *sql.DB) *DataManagerImpl {
 	}
 }
 
-func (d DataManagerImpl) GetEntry(id uint64) (string, error) {
+func (d *DataManagerImpl) GetEntry(id uint64) (string, error) {
+
+	if d.db == nil {
+		return "database connection is not established", errors.New("database connection is not established")
+	}
+
 	rows, err := d.db.Query("SELECT * FROM entries WHERE id = ?", id)
 	if err != nil {
 		return "Rows not found", err
@@ -31,7 +37,12 @@ func (d DataManagerImpl) GetEntry(id uint64) (string, error) {
 	return "No entry found", nil
 }
 
-func (d DataManagerImpl) PushData(entry Entry) error {
+func (d *DataManagerImpl) PushData(entry Entry) error {
+
+	if d.db == nil {
+		return errors.New("database connection is not established")
+	}
+
 	_, err := d.db.Exec("INSERT INTO entries (id, base62_id, long_url, date_created) VALUES (?, ?, ?, ?)", entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
 	if err != nil {
 		return err
@@ -39,14 +50,14 @@ func (d DataManagerImpl) PushData(entry Entry) error {
 	return nil
 }
 
-func (d DataManagerImpl) Close() {
+func (d *DataManagerImpl) Close() {
 	d.db.Close()
 }
 
-func (d DataManagerImpl) Ping() error {
+func (d *DataManagerImpl) Ping() error {
 	return d.db.Ping()
 }
 
-func (d DataManagerImpl) Stats() sql.DBStats {
+func (d *DataManagerImpl) Stats() sql.DBStats {
 	return d.db.Stats()
 }
