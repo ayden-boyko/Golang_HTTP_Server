@@ -11,8 +11,6 @@ import (
 	pkg "github.com/ayden-boyko/Convert_Service_Go/pkg"
 )
 
-// TODO: Add error handling
-// TODO: USE CODE 301 for redirecting, long url is cached, so if tiny url is entered, a request to this server isnt made
 func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImpl) error {
 
 	switch r.Method {

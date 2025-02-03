@@ -14,7 +14,7 @@ func (s *Server) RegisterRoutes() {
 		log.Printf("Error creating manager: %v", err)
 	}
 
-	log.Printf("manager created, %v", manager) // TODO db is nil, why?
+	log.Printf("manager created, %v", manager)
 
 	s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err := H.Home(w, r); err != nil {
