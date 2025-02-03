@@ -9,7 +9,10 @@ import (
 
 func (s *Server) RegisterRoutes() {
 	// Data manager created
-	manager := internal.NewDataManager(s.db)
+	manager, err := internal.NewDataManager(s.db)
+	if err != nil {
+		log.Printf("Error creating manager: %v", err)
+	}
 
 	log.Printf("manager created, %v", manager) // TODO db is nil, why?
 

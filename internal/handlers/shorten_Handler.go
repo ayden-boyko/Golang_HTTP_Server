@@ -29,7 +29,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 
 		uuid := uuid.New()
 
-		base10_id := binary.BigEndian.Uint64(uuid[:12])
+		base10_id := binary.BigEndian.Uint64(uuid[0:8]) & 0xFFFFFFFF // Use only lower 32 bits
 
 		base62_id, err := pkg.Uint64ToBase62(base10_id)
 
@@ -52,7 +52,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 
 		if err := dm.PushData(entry); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return errors.New("error pushing entry to db")
+			return err
 		}
 
 		fmt.Println("tiny_url:", tiny_url)

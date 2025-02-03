@@ -8,7 +8,6 @@ import (
 
 func main() {
 	server := api.NewServer()
-	server.RegisterRoutes()
 	server.Run(":8080", "database/entries.db", "sqlite", "database/schema.sql")
 }
 

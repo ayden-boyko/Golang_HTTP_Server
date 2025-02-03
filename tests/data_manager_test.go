@@ -19,18 +19,21 @@ func init() {
 		log.Fatalf("Error opening database: %v", err)
 	}
 
-	test_time, _ := time.Parse("2006-01-02", "2022-01-01")
+	test_time := time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60))
+	//drop table
+	db.Exec("DROP TABLE IF EXISTS entries")
+
 	//create table
-	db.Exec("CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY, base62_id TEXT, long_url TEXT, date_created DATE, UNIQUE(id, base62_id, long_url))")
+	db.Exec("CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY, base62_id TEXT, LongUrl TEXT, date_created DATE, UNIQUE(id, base62_id, LongUrl))")
 	//add fake data
-	_, err = db.Exec("INSERT OR IGNORE INTO entries (id, base62_id, long_url, date_created) VALUES (?, ?, ?, ?)", 1, "123", "https://test.com", test_time)
-	db.Exec("INSERT OR IGNORE INTO entries (id, base62_id, long_url, date_created) VALUES (2, '456', 'https://youtube.com', ?)", test_time)
+	_, err = db.Exec("INSERT OR IGNORE INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)", 1, "123", "https://test.com", test_time)
+	db.Exec("INSERT OR IGNORE INTO entries (id, base62_id, LongUrl, date_created) VALUES (2, '456', 'https://youtube.com', ?)", test_time)
 
 	if err != nil {
 		log.Printf("Error inserting into database: %v", err)
 	}
 
-	testDataManager = models.NewDataManager(db)
+	testDataManager, _ = models.NewDataManager(db)
 	validateDataManager = db
 }
 
@@ -41,15 +44,15 @@ func TestDataManager(t *testing.T) {
 }
 
 func TestPushData(t *testing.T) {
-	dateCreated, _ := time.Parse("2006-01-02", "2022-01-01")
-	err := testDataManager.PushData(models.Entry{Id: 3, Base62_id: "789", LongUrl: "https://google.com", Date_Created: dateCreated}) // not pushing fake data
+	test_time := time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60))
+	err := testDataManager.PushData(models.Entry{Id: 3, Base62_id: "789", LongUrl: "https://google.com", Date_Created: test_time}) // not pushing fake data
 
 	if err != nil {
 		t.Errorf("Expected no error, but got: %v", err)
 	}
 
 	var longUrl string
-	rows, _ := validateDataManager.Query("SELECT long_url FROM entries WHERE id = 3")
+	rows, _ := validateDataManager.Query("SELECT LongUrl FROM entries WHERE id = 3")
 
 	if rows.Next() {
 		rows.Scan(&longUrl)

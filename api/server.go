@@ -70,5 +70,6 @@ func (s *Server) initDB(db string, dbdriver string, initfile string) {
 func (s *Server) Run(port string, db string, dbdriver string, initfile string) error {
 	println("Server running on port " + port)
 	s.initDB(db, dbdriver, initfile)
+	s.RegisterRoutes()
 	return http.ListenAndServe(port, s.Router)
 }

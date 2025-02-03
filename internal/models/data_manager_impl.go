@@ -3,6 +3,7 @@ package internal
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 // TODO: USE locking to prevent race conditions
@@ -11,10 +12,14 @@ type DataManagerImpl struct {
 	db *sql.DB
 }
 
-func NewDataManager(db *sql.DB) *DataManagerImpl {
-	return &DataManagerImpl{
-		db: db,
+func NewDataManager(db *sql.DB) (*DataManagerImpl, error) {
+	if db == nil {
+		return nil, errors.New("database connection is nil")
 	}
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+	return &DataManagerImpl{db: db}, nil
 }
 
 func (d *DataManagerImpl) GetEntry(id uint64) (string, error) {
@@ -45,10 +50,21 @@ func (d *DataManagerImpl) PushData(entry Entry) error {
 		return errors.New("database connection is not established")
 	}
 
-	_, err := d.db.Exec("INSERT INTO entries (id, base62_id, long_url, date_created) VALUES (?, ?, ?, ?)", entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
+	if entry.Id == 0 || entry.Base62_id == "" || entry.LongUrl == "" {
+		return errors.New("invalid entry")
+	}
+
+	// check if entry already exists
+	_, err := d.db.Query("SELECT * FROM entries WHERE LongUrl = ?", entry.LongUrl)
 	if err != nil {
 		return err
 	}
+
+	_, err = d.db.Exec("INSERT INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)", entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
