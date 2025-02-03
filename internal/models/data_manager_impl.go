@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+// TODO: USE locking to prevent race conditions
+
 type DataManagerImpl struct {
 	db *sql.DB
 }
