@@ -27,7 +27,7 @@ type HTTPServer struct {
 	Server *http.Server
 	Router *http.ServeMux
 	db     *sql.DB
-	Cache  *cache.Cache
+	cache  *cache.Cache
 }
 
 // NewHTTPServer creates a new HTTPServer with an empty request multiplexer.
@@ -39,7 +39,7 @@ func NewHTTPServer() *HTTPServer {
 		Server: &http.Server{},
 		Router: http.NewServeMux(),
 		db:     nil,
-		Cache:  cache.New(10*time.Minute, 10*time.Minute), // 10 minutes
+		cache:  cache.New(10*time.Minute, 10*time.Minute), // 10 minutes
 	}
 }
 
@@ -115,15 +115,15 @@ func (s *HTTPServer) Run(port string, db string, dbdriver string, initfile strin
 func (s *HTTPServer) checkCache(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Retrieve the entry from the cache using the URL path as the key
-		entry, found := s.Cache.Get(r.URL.Path[1:])
+		entry, found := s.cache.Get(r.URL.Path[1:])
 
-		fmt.Println("Checking cache: ", entry)
+		fmt.Println("Checking cache: ", r.URL.Path[1:])
 
 		if found {
 			// Cache hit: return the cached entry
 			fmt.Println("Cache hit")
 			w.Header().Set("Cache-Status", "HIT")
-			w.Write(entry.([]byte))
+			w.Write(entry.([]byte)) // ! FIXME PANIC SERVING FIX THIS
 			fmt.Println(entry.([]byte))
 			return
 		}
@@ -136,7 +136,7 @@ func (s *HTTPServer) checkCache(next http.HandlerFunc) http.HandlerFunc {
 		// On successful response, add the entry to the cache
 		if w.Header().Get("Status") == "200" {
 			go func() {
-				s.Cache.Set(r.URL.Path[1:], w, cache.DefaultExpiration)
+				s.cache.Set(r.URL.Path[1:], w, cache.DefaultExpiration)
 			}()
 		}
 	})
