@@ -123,7 +123,7 @@ func (s *HTTPServer) checkCache(next http.HandlerFunc) http.HandlerFunc {
 			// Cache hit: return the cached entry
 			fmt.Println("Cache hit")
 			w.Header().Set("Cache-Status", "HIT")
-			w.Write(entry.([]byte)) // ! FIXME PANIC SERVING FIX THIS
+			w.Write(entry.([]byte)) // FIXME PANIC SERVING FIX THIS
 			fmt.Println(entry.([]byte))
 			return
 		}
