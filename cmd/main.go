@@ -2,13 +2,40 @@ package main
 
 import (
 	"Golang_HTTP_Server/api"
+	"context"
+	"errors"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	server := api.NewServer()
-	server.Run(":8080", "database/entries.db", "sqlite", "database/schema.sql")
+	server := api.NewHTTPServer()
+	// runs and checks for errors
+
+	go func() {
+		// TODO: PASS CONTEXT TO HANDLERS
+		if err := server.Run(":8080", "database/entries.db", "sqlite", "database/schema.sql"); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Error running server: %v", err)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	if err := server.SafeShutdown(shutdownCtx); err != nil {
+		log.Fatalf("HTTP server shutdown failed: %v", err)
+	}
+	log.Println("HTTP server shutdown safely completed")
 }
 
 // TODO: add an api rate limiter (middleware)?

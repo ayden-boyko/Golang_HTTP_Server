@@ -34,6 +34,8 @@ func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImp
 			return err
 		}
 
+		w.Header().Set("Status", "200")
+
 		// redirect to long url
 		http.Redirect(w, r, val, http.StatusMovedPermanently)
 

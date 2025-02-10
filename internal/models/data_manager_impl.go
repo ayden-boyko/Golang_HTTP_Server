@@ -24,14 +24,24 @@ func NewDataManager(db *sql.DB) (*DataManagerImpl, error) {
 
 func (d *DataManagerImpl) GetEntry(id uint64) (string, error) {
 
-	if d.db == nil {
-		return "database connection is not established", errors.New("database connection is not established")
+	if err := d.db.Ping(); err != nil {
+		return "database connection lost", fmt.Errorf("database connection lost: %w", err)
 	}
 
-	rows, err := d.db.Query("SELECT * FROM entries WHERE id = ?", id)
+	// begins a transaction
+	tx, err := d.db.Begin()
+	if err != nil {
+		return "", fmt.Errorf("error starting transaction: %w", err)
+	}
+
+	// rollback the transaction if an error occurs
+	defer tx.Rollback()
+
+	rows, err := tx.Query("SELECT * FROM entries WHERE id = ?", id)
 	if err != nil {
 		return "Rows not found", err
 	}
+
 	defer rows.Close()
 
 	if rows.Next() {
@@ -41,31 +51,46 @@ func (d *DataManagerImpl) GetEntry(id uint64) (string, error) {
 		}
 		return entry.LongUrl, nil
 	}
+	// commit the transaction
+	if err := tx.Commit(); err != nil {
+		return "", fmt.Errorf("error committing transaction: %w", err)
+	}
 	return "No entry found", nil
 }
 
 func (d *DataManagerImpl) PushData(entry Entry) error {
 
-	if d.db == nil {
-		return errors.New("database connection is not established")
+	if err := d.db.Ping(); err != nil {
+		return fmt.Errorf("database connection lost: %w", err)
 	}
 
-	if entry.Id == 0 || entry.Base62_id == "" || entry.LongUrl == "" {
-		return errors.New("invalid entry")
-	}
-
-	// check if entry already exists
-	_, err := d.db.Query("SELECT * FROM entries WHERE LongUrl = ?", entry.LongUrl)
+	// begins a transaction
+	tx, err := d.db.Begin()
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting transaction: %w", err)
 	}
 
-	_, err = d.db.Exec("INSERT INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)", entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
+	// rollback the transaction if an error occurs
+	defer tx.Rollback()
+
+	var exists bool
+	err = tx.QueryRow("SELECT 1 FROM entries WHERE LongUrl = ? LIMIT 1", entry.LongUrl).Scan(&exists)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("error querying database: %w", err)
+	}
+
+	if exists {
+		return errors.New("entry already exists")
+	}
+
+	_, err = tx.Exec("INSERT INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)",
+		entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
 	if err != nil {
-		return err
+		return fmt.Errorf("error executing database insert: %w", err)
 	}
 
-	return nil
+	// commit the transaction
+	return tx.Commit()
 }
 
 func (d *DataManagerImpl) Close() {

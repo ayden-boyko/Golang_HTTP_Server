@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) RegisterRoutes() {
+func (s *HTTPServer) RegisterRoutes() {
 	// Data manager created
 	manager, err := internal.NewDataManager(s.db)
 	if err != nil {
@@ -37,12 +37,12 @@ func (s *Server) RegisterRoutes() {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
-	s.Router.HandleFunc("/{short_url}", func(w http.ResponseWriter, r *http.Request) {
+	s.Router.HandleFunc("/{short_url}", s.checkCache(func(w http.ResponseWriter, r *http.Request) {
 		if err := H.HandleURL(w, r, manager); err != nil {
 			log.Printf("Error in HandleURL handler: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
-	})
+	}))
 
 	// Then modify your routes:
 	s.Router.Handle("/styles/", loggingMiddleware(http.StripPrefix("/styles/", http.FileServer(http.Dir("website/styles")))))
@@ -50,7 +50,7 @@ func (s *Server) RegisterRoutes() {
 
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
+func loggingMiddleware(next http.Handler) http.Handler { // TODO: make a separate package for future use
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Request received: %s %s", r.Method, r.URL.Path)
 		next.ServeHTTP(w, r)
