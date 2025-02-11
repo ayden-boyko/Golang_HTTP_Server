@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // TODO: USE locking to prevent race conditions
@@ -87,14 +88,26 @@ func (d *DataManagerImpl) PushData(entry Entry) (string, error) {
 		return exists, errors.New("entry already exists")
 	}
 
+	//before adding the long url, check if it has https or http
+	if !strings.HasPrefix(entry.LongUrl, "http") {
+		//add https if it doesn't
+		entry.LongUrl = "https://" + entry.LongUrl
+	}
+
 	_, err = tx.Exec("INSERT INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)",
 		entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
 	if err != nil {
 		return "", fmt.Errorf("error executing database insert: %w", err)
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("error committing transaction: ", err)
+		return "", fmt.Errorf("error committing transaction: %w", err)
+	}
+
 	// commit the transaction
-	return "", tx.Commit()
+	return "", err
 }
 
 func (d *DataManagerImpl) Close() {
