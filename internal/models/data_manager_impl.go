@@ -58,39 +58,43 @@ func (d *DataManagerImpl) GetEntry(id uint64) (string, error) {
 	return "No entry found", nil
 }
 
-func (d *DataManagerImpl) PushData(entry Entry) error {
+func (d *DataManagerImpl) PushData(entry Entry) (string, error) {
 
 	if err := d.db.Ping(); err != nil {
-		return fmt.Errorf("database connection lost: %w", err)
+		return "", fmt.Errorf("database connection lost: %w", err)
 	}
 
 	// begins a transaction
 	tx, err := d.db.Begin()
 	if err != nil {
-		return fmt.Errorf("error starting transaction: %w", err)
+		return "", fmt.Errorf("error starting transaction: %w", err)
 	}
 
 	// rollback the transaction if an error occurs
 	defer tx.Rollback()
 
-	var exists bool
-	err = tx.QueryRow("SELECT 1 FROM entries WHERE LongUrl = ? LIMIT 1", entry.LongUrl).Scan(&exists)
-	if err != nil && err != sql.ErrNoRows {
-		return fmt.Errorf("error querying database: %w", err)
+	// checks if the entry already exists
+	exists := ""
+	rows := tx.QueryRow("SELECT Base62_id FROM entries WHERE LongUrl = ? LIMIT 1", entry.LongUrl)
+	if err = rows.Scan(&exists); err != nil && err != sql.ErrNoRows {
+		return "", fmt.Errorf("error querying database: %w", err)
 	}
 
-	if exists {
-		return errors.New("entry already exists")
+	// if the entry already exists
+	if exists != "" {
+		fmt.Println("Entry already exists: ", exists)
+		// return the existing entry
+		return exists, errors.New("entry already exists")
 	}
 
 	_, err = tx.Exec("INSERT INTO entries (id, base62_id, LongUrl, date_created) VALUES (?, ?, ?, ?)",
 		entry.Id, entry.Base62_id, entry.LongUrl, entry.Date_Created)
 	if err != nil {
-		return fmt.Errorf("error executing database insert: %w", err)
+		return "", fmt.Errorf("error executing database insert: %w", err)
 	}
 
 	// commit the transaction
-	return tx.Commit()
+	return "", tx.Commit()
 }
 
 func (d *DataManagerImpl) Close() {

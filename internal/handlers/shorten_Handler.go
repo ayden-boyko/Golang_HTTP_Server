@@ -37,8 +37,6 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 			log.Fatal("error converting to base62", err)
 		}
 
-		tiny_url := "www.gourl.com/" + base62_id
-
 		entry := models.Entry{
 			Id:           base10_id,
 			Base62_id:    base62_id,
@@ -48,19 +46,32 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 
 		fmt.Println("entry:", entry)
 
+		var response interface{}
+
 		// TODO, make a goroutine to save entry into sqlitedb?
-		if err := dm.PushData(entry); err != nil {
+		// check if entry already exists
+		if base62_id, err = dm.PushData(entry); err.Error() == "entry already exists" {
+			fmt.Println("val:", base62_id)
+
+		} else if err != nil {
+			fmt.Println(err.Error() == "entry already exists")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return err
+
 		}
+
+		// create the response
+
+		tiny_url := "www.gourl.com/" + base62_id
 
 		fmt.Println("tiny_url:", tiny_url)
 
-		response := struct {
+		response = struct {
 			ShortUrl string `json:"short_url"`
 		}{
 			ShortUrl: tiny_url,
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Println("response:", response)
 		json.NewEncoder(w).Encode(response)

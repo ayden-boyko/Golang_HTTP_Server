@@ -11,10 +11,11 @@ import (
 	pkg "github.com/ayden-boyko/Convert_Service_Go/pkg"
 )
 
-func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImpl) error {
-
+func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImpl) (string, error) {
+	var val string
 	switch r.Method {
 	case "GET":
+		fmt.Println("received get request")
 		Base62_id := r.URL.Path[1:]
 		Base10_id, err := pkg.Base62ToUint64(Base62_id)
 
@@ -25,10 +26,11 @@ func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImp
 		fmt.Println("Base62_id:", Base62_id)
 		fmt.Println("Base10_id:", Base10_id)
 
+		// get long url from database
 		val, err := dm.GetEntry(Base10_id)
 
 		if err != nil {
-			return err
+			return "Error", err
 		}
 
 		w.Header().Set("Status", "200")
@@ -39,5 +41,5 @@ func HandleURL(w http.ResponseWriter, r *http.Request, dm *models.DataManagerImp
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	return nil
+	return val, nil
 }

@@ -44,15 +44,12 @@ func main() {
 
 	// Shutdown the server. This will block until the server is shutdown.
 	if err := server.SafeShutdown(shutdownCtx); err != nil {
-		log.Fatalf("HTTP server shutdown failed: %v", err)
+		log.Fatalf("\n HTTP server shutdown failed: %v", err)
 	}
-	log.Println("HTTP server shutdown safely completed")
+	log.Println("\n HTTP server shutdown safely completed")
 }
 
 // TODO: add an api rate limiter (middleware)?
-
-// Database handling: Your initDB function in api/server.go is responsible for initializing the database connection and executing the SQL script from the initfile.
-// 					This is a good approach, but you might want to consider separating the database initialization logic into its own package or file to keep the server logic clean.
 
 // Error handling: In your initDB function, you're using log.Fatalf to handle errors.
 // 					While this is acceptable for development, you might want to consider using a more robust error handling mechanism,

@@ -5,6 +5,8 @@ import (
 	internal "Golang_HTTP_Server/internal/models"
 	"log"
 	"net/http"
+
+	"github.com/patrickmn/go-cache"
 )
 
 func (s *HTTPServer) RegisterRoutes() {
@@ -38,9 +40,13 @@ func (s *HTTPServer) RegisterRoutes() {
 		}
 	})
 	s.Router.HandleFunc("/{short_url}", s.checkCache(func(w http.ResponseWriter, r *http.Request) {
-		if err := H.HandleURL(w, r, manager); err != nil {
+		var val string
+		if val, err = H.HandleURL(w, r, manager); err != nil {
 			log.Printf("Error in HandleURL handler: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		} else {
+			//adds entry to cache after a successful response
+			s.cache.Add(r.URL.Path[1:], val, cache.DefaultExpiration)
 		}
 	}))
 

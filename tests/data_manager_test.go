@@ -45,7 +45,7 @@ func TestDataManager(t *testing.T) {
 
 func TestPushData(t *testing.T) {
 	test_time := time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60))
-	err := testDataManager.PushData(models.Entry{Id: 3, Base62_id: "789", LongUrl: "https://google.com", Date_Created: test_time}) // not pushing fake data
+	_, err := testDataManager.PushData(models.Entry{Id: 3, Base62_id: "789", LongUrl: "https://google.com", Date_Created: test_time}) // not pushing fake data
 
 	if err != nil {
 		t.Errorf("Expected no error, but got: %v", err)

@@ -121,10 +121,9 @@ func (s *HTTPServer) checkCache(next http.HandlerFunc) http.HandlerFunc {
 
 		if found {
 			// Cache hit: return the cached entry
-			fmt.Println("Cache hit")
+			fmt.Println("Cache hit: ", entry.(string))
 			w.Header().Set("Cache-Status", "HIT")
-			w.Write(entry.([]byte)) // FIXME PANIC SERVING FIX THIS
-			fmt.Println(entry.([]byte))
+			http.Redirect(w, r, entry.(string), http.StatusMovedPermanently)
 			return
 		}
 
