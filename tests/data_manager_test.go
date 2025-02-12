@@ -43,6 +43,7 @@ func TestDataManager(t *testing.T) {
 	}
 }
 
+// pushing new data
 func TestPushData(t *testing.T) {
 	test_time := time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60))
 	_, err := testDataManager.PushData(models.Entry{Id: 3, Base62_id: "789", LongUrl: "https://google.com", Date_Created: test_time}) // not pushing fake data
@@ -65,6 +66,9 @@ func TestPushData(t *testing.T) {
 	}
 }
 
+// TODO pushing replicate data
+
+// get existing data
 func TestGetEntry(t *testing.T) {
 
 	data, err := testDataManager.GetEntry(uint64(1))
@@ -77,6 +81,8 @@ func TestGetEntry(t *testing.T) {
 	}
 
 }
+
+//TODO get non existing data
 
 func TestDataManagerClose(t *testing.T) {
 	testDataManager.Close()
