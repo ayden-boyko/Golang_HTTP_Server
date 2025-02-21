@@ -135,7 +135,7 @@ func (s *HTTPServer) checkCache(next http.HandlerFunc) http.HandlerFunc {
 		// On successful response, add the entry to the cache
 		if w.Header().Get("Status") == "200" {
 			go func() {
-				s.cache.Set(r.URL.Path[1:], w, cache.DefaultExpiration)
+				s.cache.Set(r.URL.Path[1:], w.Header().Get("Location"), cache.DefaultExpiration)
 			}()
 		}
 	})

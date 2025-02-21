@@ -3,6 +3,7 @@ package tests
 import (
 	models "Golang_HTTP_Server/internal/models"
 	"database/sql"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -66,7 +67,15 @@ func TestPushData(t *testing.T) {
 	}
 }
 
-// TODO pushing replicate data
+func TestPushReplicateData(t *testing.T) {
+	test_time := time.Date(2025, 1, 26, 16, 11, 35, 0, time.FixedZone("EST", -5*60*60))
+	_, err := testDataManager.PushData(models.Entry{Id: 1, Base62_id: "123", LongUrl: "https://test.com", Date_Created: test_time}) // pushing fake data
+
+	if err == nil {
+		t.Errorf("Expected error, but got: %v", err)
+	}
+
+}
 
 // get existing data
 func TestGetEntry(t *testing.T) {
@@ -82,7 +91,13 @@ func TestGetEntry(t *testing.T) {
 
 }
 
-//TODO get non existing data
+func TestGetNonExistingEntry(t *testing.T) {
+	data, err := testDataManager.GetEntry(uint64(17))
+	fmt.Println("non existing data: ", data)
+	if err != nil && data != "No entry found" {
+		t.Errorf("Expected error, but got: %v, long URL: %s", err, data)
+	}
+}
 
 func TestDataManagerClose(t *testing.T) {
 	testDataManager.Close()

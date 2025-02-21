@@ -49,7 +49,6 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 		var response interface{}
 		var existing_base62_id string
 
-		// TODO, make a goroutine to save entry into sqlitedb?
 		// check if entry already exists
 		if existing_base62_id, err := dm.PushData(entry); err != nil && err.Error() == "entry already exists" {
 			fmt.Println("val:", existing_base62_id)
@@ -59,7 +58,7 @@ func HandleShorten(w http.ResponseWriter, r *http.Request, dm *models.DataManage
 			return err
 		}
 
-		if existing_base62_id == "" {
+		if existing_base62_id != "" {
 			base62_id = existing_base62_id
 		}
 

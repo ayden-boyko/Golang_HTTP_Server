@@ -1,0 +1,5 @@
+{
+    "log_level": "info",
+    "log_output": "file",
+    "log_file": "./logs/data.json"
+}
