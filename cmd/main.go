@@ -49,5 +49,7 @@ func main() {
 	log.Println("\n HTTP server shutdown safely completed")
 }
 
+// TODO NGINX?
+
 // Imports: You're using some external libraries (e.g., github.com/ayden-boyko/Convert_Service_Go/pkg), which is fine.
 // 		However, you might want to consider vendoring these dependencies to ensure your project is self-contained.
